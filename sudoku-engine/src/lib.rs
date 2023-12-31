@@ -1,5 +1,11 @@
 use rand::Rng;
 
+/// Generate a single quadrant of the sudoku.
+/// 
+/// Size indicate the edge size.
+/// 
+/// If is_empty is true the quadrant will be filled with 0 that will be replaced generating the sudoku, 
+/// else it will be filled to have different number from 1 to size*size in a randomized order.
 /// 
 fn generate_quadrant(size: u8, is_empty: bool) -> Vec<Vec<u8>> {
     let mut quadrant: Vec<Vec<u8>> = Vec::with_capacity(size as usize);

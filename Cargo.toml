@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "sudoku-engine"
+]
+default-members = []
+resolver = "2"
+
+[workspace.package]
+authors = ["rustedmoon <rustedmoon@proton.me>"]
+homepage = "https://github.com/rustedmoon/sudoku-rs"
+repository = "https://github.com/rustedmoon/sudoku-rs.git"
+license = "MIT"

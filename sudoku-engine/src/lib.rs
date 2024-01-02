@@ -1,16 +1,14 @@
 use std::collections::HashSet;
 
-// TODO
+// The number indicate the percentage of total number to be removed, the difficulty scale up with size
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Difficulty {
-    Idiot,
-    Beginner,
-    Easy,
-    Medium,
-    Hard,
-    Impossible,
-    Mortal,
-    God,
+    Beginner = 15,
+    Easy = 30,
+    Medium = 45,
+    Hard = 57,
+    Extreme = 66,
+    Impossible = 79,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -22,7 +20,7 @@ pub enum BoardSize {
 
 pub struct Sudoku {
     pub difficulty: Difficulty,
-    pub template: Vec<Vec<u8>>,
+    _starting: HashSet<(usize, usize)>,
     pub play: Vec<Vec<u8>>,
 }
 
@@ -30,12 +28,22 @@ impl Sudoku {
     /// Generate a sudoku with specified quadrant edge size and remove number based on chosen difficulty.
     pub fn generate(size: BoardSize, difficulty: Difficulty) -> Self {
         // Generate sudoku
-        let mut sudoku = generate_empty(size);
-        solve_sudoku(&mut sudoku);
+        let mut sudoku = generate(size);
+        apply_difficulty(&mut sudoku, difficulty);
+
+        // Save starting position that shouldn't be modified by the player
+        let mut coordinates: HashSet<(usize, usize)> = HashSet::new();
+        for row in 0..size as usize {
+            for column in 0..size as usize {
+                if sudoku[row][column] != 0 {
+                    coordinates.insert((row, column));
+                }
+            }
+        }
 
         Self {
             difficulty,
-            template: sudoku.clone(),
+            _starting: coordinates,
             play: sudoku,
         }
     }
@@ -44,13 +52,15 @@ impl Sudoku {
         verify(&self.play)
     }
 
-    pub fn add_number(&mut self, num: u8, row: usize, column: usize) {
+    /* pub fn add_number(&mut self, num: u8, row: usize, column: usize) {
         todo!()
-    }
+    } */
 }
 
-fn generate_empty(size: BoardSize) -> Vec<Vec<u8>> {
-    vec![vec![0u8; size as usize]; size as usize]
+fn generate(size: BoardSize) -> Vec<Vec<u8>> {
+    let mut sudoku = vec![vec![0u8; size as usize]; size as usize];
+    solve_sudoku(&mut sudoku);
+    sudoku
 }
 
 fn is_valid(sudoku: &Vec<Vec<u8>>, size_sqrt: usize, row: usize, column: usize, num: u8) -> bool {
@@ -114,6 +124,22 @@ fn verify(sudoku: &Vec<Vec<u8>>) -> bool {
     true
 }
 
+fn apply_difficulty(sudoku: &mut Vec<Vec<u8>>, difficulty: Difficulty) {
+    let size = sudoku.len();
+    let difficulty: usize = size * size * difficulty as usize / 100;
+    let mut coordinates: HashSet<(usize, usize)> = HashSet::with_capacity(size * size);
+
+    for row in 0..size {
+        for column in 0..size {
+            coordinates.insert((row, column));
+        }
+    }
+
+    for (row, column) in coordinates.into_iter().take(difficulty) {
+        sudoku[row][column] = 0;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -172,19 +198,19 @@ mod tests {
 
     #[test]
     fn test_4x4_sudoku() {
-        let sudoku = Sudoku::generate(BoardSize::Four, Difficulty::Beginner);
-        assert!(verify(&sudoku.template));
+        let sudoku = generate(BoardSize::Four);
+        assert!(verify(&sudoku));
     }
 
     #[test]
     fn test_9x9_sudoku() {
-        let sudoku = Sudoku::generate(BoardSize::Nine, Difficulty::Beginner);
-        assert!(verify(&sudoku.template));
+        let sudoku = generate(BoardSize::Nine);
+        assert!(verify(&sudoku));
     }
 
     #[test]
     fn test_16x16_sudoku() {
-        let sudoku = Sudoku::generate(BoardSize::Sixteen, Difficulty::Beginner);
-        assert!(verify(&sudoku.template));
+        let sudoku = generate(BoardSize::Sixteen);
+        assert!(verify(&sudoku));
     }
 }

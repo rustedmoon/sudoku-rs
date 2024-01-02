@@ -1,0 +1,12 @@
+[package]
+name = "sudoku-cli"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+sudoku-engine = { path = "../sudoku-engine" }

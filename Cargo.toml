@@ -1,8 +1,9 @@
 [workspace]
 members = [
+    "sudoku-cli",
     "sudoku-engine"
 ]
-default-members = []
+default-members = ["sudoku-cli"]
 resolver = "2"
 
 [workspace.package]
@@ -10,3 +11,7 @@ authors = ["rustedmoon <rustedmoon@proton.me>"]
 homepage = "https://github.com/rustedmoon/sudoku-rs"
 repository = "https://github.com/rustedmoon/sudoku-rs.git"
 license = "MIT"
+
+[profile.release]
+lto = true
+codegen-units = 1

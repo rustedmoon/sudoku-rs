@@ -1,5 +1,11 @@
 use std::collections::HashSet;
 
+pub enum Error {
+    InvalidNumber,
+    InvalidCoordinate,
+    StartingNumbers
+}
+
 // The number indicate the percentage of total number to be removed, the difficulty scale up with size
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Difficulty {
@@ -20,7 +26,7 @@ pub enum BoardSize {
 
 pub struct Sudoku {
     pub difficulty: Difficulty,
-    _starting: HashSet<(usize, usize)>,
+    starting: HashSet<(usize, usize)>,
     pub play: Vec<Vec<u8>>,
 }
 
@@ -43,7 +49,7 @@ impl Sudoku {
 
         Self {
             difficulty,
-            _starting: coordinates,
+            starting: coordinates,
             play: sudoku,
         }
     }
@@ -52,9 +58,32 @@ impl Sudoku {
         verify(&self.play)
     }
 
-    /* pub fn add_number(&mut self, num: u8, row: usize, column: usize) {
-        todo!()
-    } */
+    pub fn add_number(&mut self, num: u8, row: usize, column: usize) -> Result<(), Error> {
+        if num as usize > self.play.len() {
+            Err(Error::InvalidNumber)
+        } else if row > self.play.len() || column > self.play.len() {
+            Err(Error::InvalidCoordinate)
+        } else if self.starting.contains(&(row, column)) {
+            Err(Error::StartingNumbers)
+        } else {
+            self.play[row - 1][column - 1] = num;
+            Ok(())
+        }
+        
+    }
+
+    pub fn remove_number(&mut self, row: usize, column: usize) -> Result<(), Error> {
+        if row > self.play.len() || column > self.play.len() {
+            Err(Error::InvalidCoordinate)
+        } else if self.starting.contains(&(row, column)) {
+            Err(Error::StartingNumbers)
+        } else {
+            self.play[row - 1][column - 1] = 0;
+            Ok(())
+        }
+    }
+
+    
 }
 
 fn generate(size: BoardSize) -> Vec<Vec<u8>> {

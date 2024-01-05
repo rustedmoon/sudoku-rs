@@ -5,8 +5,8 @@ pub enum Error {
     InvalidNumber,
     InvalidCoordinate,
     StartingNumbers,
-    UnkownDifficulty,
-    UknownBoardSize,
+    UnkownDifficulty(String),
+    UknownBoardSize(String),
 }
 
 // The number indicate the percentage of total number to be removed, the difficulty scale up with size
@@ -32,7 +32,7 @@ impl FromStr for Difficulty {
             "hard" => Ok(Self::Hard),
             "extreme" => Ok(Self::Extreme),
             "impossible" => Ok(Self::Impossible),
-            _ => Err(Error::UnkownDifficulty),
+            s => Err(Error::UnkownDifficulty(s.to_string())),
         }
     }
 }
@@ -53,7 +53,7 @@ impl FromStr for BoardSize {
             "4" => Ok(Self::Four),
             "9" => Ok(Self::Nine),
             "16" => Ok(Self::Sixteen),
-            _ => Err(Error::UnkownDifficulty),
+            s => Err(Error::UknownBoardSize(s.to_string())),
         }
     }
 }

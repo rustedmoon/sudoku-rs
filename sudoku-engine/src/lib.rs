@@ -1,29 +1,64 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, str::FromStr};
 
+#[derive(Debug)]
 pub enum Error {
     InvalidNumber,
     InvalidCoordinate,
-    StartingNumbers
+    StartingNumbers,
+    UnkownDifficulty,
+    UknownBoardSize,
 }
 
 // The number indicate the percentage of total number to be removed, the difficulty scale up with size
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Difficulty {
     Beginner = 15,
     Easy = 30,
+    #[default]
     Medium = 45,
     Hard = 57,
     Extreme = 66,
     Impossible = 79,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+impl FromStr for Difficulty {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "beginner" => Ok(Self::Beginner),
+            "easy" => Ok(Self::Easy),
+            "medium" => Ok(Self::Medium),
+            "hard" => Ok(Self::Hard),
+            "extreme" => Ok(Self::Extreme),
+            "impossible" => Ok(Self::Impossible),
+            _ => Err(Error::UnkownDifficulty),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum BoardSize {
     Four = 4,
+    #[default]
     Nine = 9,
     Sixteen = 16,
 }
 
+impl FromStr for BoardSize {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "4" => Ok(Self::Four),
+            "9" => Ok(Self::Nine),
+            "16" => Ok(Self::Sixteen),
+            _ => Err(Error::UnkownDifficulty),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Sudoku {
     pub difficulty: Difficulty,
     starting: HashSet<(usize, usize)>,
@@ -167,6 +202,67 @@ fn apply_difficulty(sudoku: &mut Vec<Vec<u8>>, difficulty: Difficulty) {
     for (row, column) in coordinates.into_iter().take(difficulty) {
         sudoku[row][column] = 0;
     }
+}
+
+pub fn sudoku_as_string(sudoku: &Vec<Vec<u8>>) -> String {
+    let size = sudoku.len();
+    let size_sqrt = (size as f64).sqrt() as usize;
+
+    let mut line_separator = (0..(if size / 10 == 0 {size + size_sqrt} else {size + size_sqrt - size / 10}))
+        .map(|_| if size / 10 == 0 { " -" } else { " --" })
+        .collect::<Vec<&str>>()
+        .join("");
+    line_separator.push_str("\n");
+
+    let mut output: String = String::new();
+    output.push_str(&line_separator);
+
+    for row in 0..size {
+        let mut row_string: String = String::new();
+
+        for column in 0..size {
+            if (column + 1) % size_sqrt != 0 {
+                row_string.push_str(" ");
+
+                if sudoku[row][column] > 0 && sudoku[row][column] < 10 && size / 10 == 0
+                    || sudoku[row][column] > 10
+                {
+                    row_string.push_str(&sudoku[row][column].to_string())
+                } else if sudoku[row][column] > 0 && sudoku[row][column] < 10 {
+                    row_string.push_str(" ");
+                    row_string.push_str(&sudoku[row][column].to_string())
+                } else if size / 10 == 0 {
+                    row_string.push_str("_")
+                } else {
+                    row_string.push_str("__")
+                };
+            } else {
+                row_string.push_str(" ");
+
+                if sudoku[row][column] > 0 && sudoku[row][column] < 10 && size / 10 == 0
+                    || sudoku[row][column] > 10
+                {
+                    row_string.push_str(&sudoku[row][column].to_string())
+                } else if sudoku[row][column] > 0 && sudoku[row][column] < 10 {
+                    row_string.push_str(" ");
+                    row_string.push_str(&sudoku[row][column].to_string())
+                } else if size / 10 == 0 {
+                    row_string.push_str("_")
+                } else {
+                    row_string.push_str("__")
+                };
+                row_string.push_str(" |");
+            }
+        }
+        if (row + 1) % size_sqrt == 0 {
+            row_string.push_str("\n");
+            row_string.push_str(&line_separator);
+        } else {
+            row_string.push_str("\n");
+        }
+        output.push_str(&row_string)
+    }
+    output
 }
 
 #[cfg(test)]
